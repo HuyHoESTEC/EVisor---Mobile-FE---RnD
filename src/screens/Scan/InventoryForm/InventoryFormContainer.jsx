@@ -1,151 +1,118 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchPOList, fetchProjectCodeList, submitFormData } from "../../../api";
+import React, { useState } from "react";
 import Step1Project from "./Step1Project";
 import Step2PO from "./Step2PO";
 import Step3Input from "./Step3Input";
-import Stepper from "../../../components/Shared/Stepper";
+import InventoryIco from '../../../assets/icon/entered_warehouse.png';
+import ListScanIco from '../../../assets/icon/list.png';
+import '../../../style/InventoryStyle.css';
 
-const TOTAL_STEPS = 3;
 const InventoryFormContainer = ({ user, onToast, onBack }) => {
     const [step, setStep] = useState(1);
-    const [projectList, setProjectList] = useState([]);
-    const [poList, setPOList] = useState([]);
-    const [isListLoading, setIsListLoading] = useState(true);
     const [projectCode, setProjectCode] = useState('');
-    const [newProjectCode, setNewProjectCode] = useState('');
     const [po, setPO] = useState('');
-    const [formType, setFormType] = useState(null);
-    const [formData, setFormDataState] = useState({ po: '', code: '', partNumber: '' });
-    const [isLoading, setIsLoading] = useState(false);
 
-    const finalProjectCode = useMemo(() => projectCode === 'NEW_CODE' ? newProjectCode.trim() : projectCode, [projectCode, newProjectCode]);
-    const setFormData = useCallback((key, value) => setFormDataState(prev => ({ ...prev, [key]: value })), []);
-
-    // Load Data
-    useEffect(() => {
-        const loadData = async () => {
-            setIsListLoading(true);
-            try {
-                const projects = await fetchProjectCodeList();
-                const po = await fetchPOList();
-                setProjectList(projects);
-                setPOList(po);
-            } catch (err) {
-                onToast(`Lỗi khi tải dữ liệu: ${err.message}`, 'error');
-            } finally {
-                setIsListLoading(false);
-            }
-        };
-        loadData();
-    }, [onToast]);
+    const renderStepper = () => {
+        return (
+            <div className="custom-stepper">
+                {/* Step 1 */}
+                <div className={`step-item ${step > 1 ? 'completed' : 'active'}`}>
+                    {step > 1 ? '✓' : '1'}
+                </div>
+                <div className="step-line"></div>
+                {/* Step 2 */}
+                <div className={`step-item ${step > 2 ? 'completed' : (step === 2 ? 'active' : '')}`}>
+                    {step > 2 ? '✓' : '2'}
+                </div>
+                <div className="step-line"></div>
+                {/* Step 3 */}
+                <div className={`step-item ${step === 3 ? 'active' : ''}`}>
+                    3
+                </div>
+            </div>
+        )
+    }
 
     // Handlers
     const handleNextStep = () => {
-        if (isListLoading) {onToast("Dữ liệu đang được tải.", 'error'); return;}
-        if (step === 1 && (!finalProjectCode || (projectCode === 'NEW_CODE' && !newProjectCode.trim()))) {
-            onToast("Vui lòng chọn hoặc nhập Mã Dự Án.", 'error'); return;
-        }
-        if (step === 2 && !po) {
-            onToast("Vui lòng chọn mã PO.", 'error'); return;
-        }
+        if (step === 1 && !projectCode) return onToast('Vui lòng nhập Dự án', 'error');
+        if (step === 2 && !po) return onToast('Vui lòng nhập PO', 'error');
         setStep(prev => prev + 1);
     };
 
     const handleBackStep = () => {
-        if (step === 1) { onBack(); return; }
-        if (step === 3) setFormType(null); // Reset form type when back
-        setStep(prev => prev - 1);
+        if (step === 1) onBack(); 
+        else setStep(prev => prev - 1);
     };
 
-    const handleSubmit = async () => {
-        if (!formType) { onToast("Vui lòng chọn kiểu Form.", 'error'); return; }
-        const  { po, code, partNumber, seriNumber } = formData;
-
-        if (formType === 1 && (!code)) { onToast("Vui lòng điền Mã Code", 'error'); return; }
-        if (formType === 2 && (!partNumber || !seriNumber)) { onToast("Vui lòng điền đẩy đủ Part Number và Seri Number.", 'error'); return; }
-        // Prepare payload
-        const REQUEST_ID = `evisor-${Date.now()}`;
-        const OWNER = user.owner;
-        let formSpecificData;
-
-        if (formType === 1) {
-            formSpecificData = { project_code: finalProjectCode, po: po, code: code };
-        } else if (formType === 2) {
-            formSpecificData = { projectCode: finalProjectCode, po: po, part_number: partNumber, seri_no: seriNumber };
-        }
-
-        const finalPayload = { request_id: REQUEST_ID, owner: OWNER, form: formSpecificData };
-        try {
-            setIsLoading(true);
-            await submitFormData({ data: finalPayload, formType: formType });
-            onToast("Lưu dữ liệu thành công!", 'success');
-            // Reset to step 1 or 3
-            setFormDataState({ po: '', code: '', partNumber: '', seriNumber: '' });
-            setFormType(null);
-            setStep(3);
-        } catch (error) {
-            onToast(`Lỗi: ${error.message}`, 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const renderStepContent = () => {
-        if (step === 1) {
-            return <Step1Project 
-                list={projectList}
-                isLoading={isListLoading}
-                projectCode={projectCode}
-                setProjectCode={setProjectCode}
-                newProjectCode={newProjectCode}
-                setNewProjectCode={setNewProjectCode}
-            />;
-        }
-        if (step === 2) {
-            return <Step2PO 
-                list={poList}
-                isLoading={isListLoading}
-                po={po}
-                setPO={setPO}
-            />;
-        }
-        if (step === 3) {
-            return <Step3Input 
-                formType={formType}
-                setFormType={setFormType}
-                formData={formData}
-                setFormData={setFormData}
-                onSubmit={handleSubmit}
-                finalProjectCode={finalProjectCode}
-                po={po}
-                isLoading={isLoading}
-                onToast={onToast}
-            />;
-        }
-        return null;
+    const handleBackToStep1 = () => {
+        setStep(1);
     };
 
     return (
-        <div className="app-container">
-            <header className="app-header">
-                <h1 className="header-title">Nhập Kho ({step}/{TOTAL_STEPS})</h1>
-                <Stepper currentStep={step} totalSteps={TOTAL_STEPS} />
-            </header>
-            <main className="app-main">
-                {renderStepContent()}
+        <div className="inventory-container">
+            <main className="inventory-card">
+                <div className="card-title-row">
+                    <div className="card-title-left">
+                        <img src={InventoryIco} alt="" className="card-icon" />
+                        <span className="card-title">Nhập Kho</span>
+                    </div>
+                    <button className="btn-icon-action" onClick={() => onBack('SCAN_MENU')}>
+                        <img src={ListScanIco} alt="Menu" />
+                    </button>
+                </div>
+                {renderStepper()}
+                <div style={{ flex: 1 }}>
+                    {step === 1 && (
+                        <Step1Project 
+                            projectCode={projectCode}
+                            setProjectCode={setProjectCode}
+                        />
+                    )}
+                    {step === 2 && (
+                        <Step2PO 
+                            projectCode={projectCode}
+                            po={po}
+                            setPO={setPO}
+                        />
+                    )}
+                    {step === 3 && (
+                        <Step3Input 
+                            projectCode={projectCode}
+                            po={po}
+                            onBack={handleBackStep}
+                            onToast={onToast}
+                            user={user}
+                        />
+                    )}
+                </div>
+                {/* Step 1: Chỉ hiện nút Tiếp tục */}
+                {step === 1 && (
+                    <div className="footer-actions" style={{ justifyContent: 'center' }}>
+                        <button className="btn-next-blue btn-green" onClick={handleNextStep}>
+                            Tiếp Tục &rarr;
+                        </button>
+                    </div>
+                )}
+
+                {/* Step 2: Hiện nút Quay lại (Vàng) và Tiếp tục */}
+                {step === 2 && (
+                    <div className="footer-actions" style={{ justifyContent: 'space-between' }}>
+                        <button 
+                            className="btn-back-yellow" 
+                            onClick={handleBackToStep1}
+                        >
+                            &larr; Quay lại
+                        </button>
+
+                        <button 
+                            className="btn-next-blue btn-green" 
+                            onClick={handleNextStep}
+                        >
+                            Tiếp Tục &rarr;
+                        </button>
+                    </div>
+                )}
             </main>
-            <footer>
-                {step > 0 && (
-                    <button className="btn-secondary" onClick={handleBackStep} disabled={isLoading}>
-                        &larr; {step === 1 ? 'Hủy bỏ' : 'Quay lại'}
-                    </button>
-                )}
-                {step < TOTAL_STEPS && (
-                    <button className="btn-primary btn-primary-blue" onClick={handleNextStep} disabled={isListLoading || isLoading}>
-                        Tiếp tục &rarr;
-                    </button>
-                )}
-            </footer>
         </div>
     );
 };

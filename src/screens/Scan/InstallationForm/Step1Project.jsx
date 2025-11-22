@@ -1,38 +1,30 @@
 import React from "react";
 
-const Step1Project = ({ list, isLoading, projectCode, setProjectCode, newProjectCode, setNewProjectCode }) => {
+const Step1Project = ({ projectCode, setProjectCode }) => {
     return (
-        <div className="step-content-card">
-            <h2 className="text-xl font-semibold mb-4 text-blue-600">1. Chọn Mã Dự Án</h2>
-            <p className="text-gray-600 mb-6">Vui lòng chọn mã dự án hiện có hoặc nhập mã dự án mới nếu cần.</p>
+        <div style={{ textAlign: 'center' }}>
+            <h3 style={{ marginBottom: '20px', color: '#2c2c6a' }}>Nhập Mã Dự Án</h3>
 
-            <label className="form-label">Mã Dự Án</label>
-            {isLoading ? (<div className="loading-message">Đang tải danh sách...</div>) : (
-                <select
-                    className="select-field"
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                <label className="inv-label">Mã dự án:</label>
+                <input 
+                    className="inv-input-box"
+                    type="text"
                     value={projectCode}
-                    onChange={(e) => {
-                        setProjectCode(e.target.value);
-                        if (e.target.value !== 'NEW_CODE') setNewProjectCode('');
-                    }}
-                >
-                    <option value="" disabled>--- Chọn Mã Dự Án ---</option>
-                    {list.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
-                </select>
-            )}
-
-            {projectCode === 'NEW_CODE' && (
-                <div className="mt-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
-                    <label className="form-label block">Nhập Mã Dự Án Mới</label>
-                    <input 
-                        className="input-field"
-                        type="text"
-                        value={newProjectCode}
-                        onChange={(e) => setNewProjectCode(e.target.value)}
-                        placeholder="PROJ-ES-XYZ"
-                    />
+                    onChange={(e) => setProjectCode(e.target.value)}
+                    placeholder="Nhập mã dự án..."
+                    autoComplete="off"
+                />
+                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '5px' }}>
+                    * Vui lòng nhập chính xác mã dự án mới hoặc mã hiện có
+                </p>
+            </div>
+            <div style={{ marginBottom: '10px', textAlign: "left"}}>
+                <label className="inv-label" style={{ fontSize: '0.9rem', color: '#666' }}>Dữ liệu nhập:</label>
+                <div className="inv-input-box" style={{ backgroundColor: '#f0f0f0', color: '#888' }}>
+                    {projectCode || "..."}
                 </div>
-            )}
+            </div>
         </div>
     );
 };

@@ -1,92 +1,138 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import '../../../style/Step3Input.css';
+import { submitFormData } from "../../../api";
 
-const Form1Fields = ({ formData, setFormData }) => {
-    return (
-        <div className="form-group space-y-4">
-            <label className="form-label block">Mã Code</label>
-            <input className="input-field" type="text" value={formData.code} onChange={(e) => setFormData('code', e.target.value)} />
-        </div>
-    );
-};
-
-const Form2Fields = ({ formData, setFormData, onToast }) => {
+const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
+    // 1. Form Code, 2. Form Part/Seri
+    const [formType, setFormType] = useState(2);
+    // Form Data
+    const [code, setCode] = useState('');
+    const [partNumber, setPartNumber] = useState('');
+    const [seriNumber, setSeriNumber] = useState('');
+    // Submission Status: 'idle' | 'loading' | 'success' | 'error'
+    const [status, setStatus] = useState('idle');
+    const [message, setMessage] = useState('');
     const seriInputRef = useRef(null);
-    // Resolve input from scan device
+
     const handleScanComplete = (e) => {
-        // Only resolve when click enter (scan device usually send Enter) or when focus eye
-        if (e.key === 'Enter' || e.type === 'blur') {
+        if (e.key === 'Enter' || e.target === 'blur') {
             const scannedValue = e.target.value.trim();
             if (scannedValue && scannedValue.length > 5) {
+                setSeriNumber(scannedValue);
                 onToast(`Mã Seri đã được quét: ${scannedValue}`, 'success');
             }
-            // Prevent form submit if Enter
-            if (e.key === 'Enter') e.preventDefault();
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        }
+    }
+
+    const handleSubmit = async () => {
+        setStatus('loading');
+        try {
+            const payload = {
+                projectCode,
+                po,
+                type: formType === 1 ? 'CODE' : 'PART_SERI',
+                data: formType === 1 ? { code } : { partNumber, seriNumber },
+                owner: user.owner
+            };
+            await submitFormData({ data: payload, formType });
+            // Resolve success
+            setStatus('success');
+            setMessage('Gửi dữ liệu thành công');
+        } catch (error) {
+            console.log(error);
+            setStatus('error');
+            setMessage('Dữ liệu đã tồn tại trong hệ thống');
         }
     };
 
-    return (
-        <div className="form-group space-y-4">
-            <label className="form-label block">Part Number</label>
-            <input className="input-field" type="text" value={formData.partNumber} onChange={(e) => setFormData('partNumber', e.target.value)} placeholder="Nhập Part Number" />
-
-            <label className="form-label block font-bold text-gray-700">Seri Number</label>
-            <input 
-                ref={seriInputRef}
-                className="input-field bg-yellow-50 border-yellow-300"
-                type="text"
-                value={formData.seriNumber}
-                onChange={(e) => setFormData('seriNumber', e.target.value)}
-                onKeyDown={handleScanComplete}
-                onBlur={handleScanComplete}
-                placeholder="Di chuyển máy quét qua đây..."
-            />
-        </div>
-    );
-};
-
-const Step3Input = ({ formType, setFormType, formData, setFormData, onSubmit, finalProjectCode, po, isLoading, onToast }) => {
-    const submitClasses = `btn-primary btn-submit-green ${isLoading ? 'btn-loading' : ''}`;
+    const resetForm = () => {
+        setStatus('idle');
+        setSeriNumber('');
+    }
 
     return (
-        <div className="step-content-card">
-            <h2 className="text-xl font-semibold mb-4 text-blue-600">3. Nhập Dữ Liệu & Gửi</h2>
-            <div className="info-display-grid mb-6">
-                <div>
-                    <label className="info-label">Dự Án</label>
-                    <input className="info-value-field" value={finalProjectCode} readOnly />
-                </div>
-                <div>
-                    <label className="info-label">PO</label>
-                    <input className="infor-value-field" value={po} readOnly />
-                </div>
+        <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginBottom: '15px' }}>
+                <label className="inv-label">Mã dự án:</label>
+                <input className="inv-input-box" value={projectCode} readOnly />
+                <label className="inv-label">Mã PO:</label>
+                <input className="inv-input-box" value={po} readOnly />
             </div>
-
-            <span className="form-label forn-bold">Chọn kiểu Form Nhập Kho</span>
-            <div className="form-select-group mb-6 flex space-x-2">
+            <div className="toggle-switch-container">
                 <button
-                    className={`flex-1 p-3 rounded-xl border-2 transition-colors ${formType === 1 ? 'bg-blue-100 border-blue-600 text-blue-800 font-semibold' : 'bg-gray-50 border-gray-300 text-gray-600'}`}
-                    onClick={() => { setFormType(1); setFormData('partNumber', ''); setFormData('seriNumber', ''); }}
+                    className={`toggle-btn left ${formType === 1 ? 'active' : ''}`}
+                    onClick={() => setFormType(1)}
                 >
-                    <span className="text-2xl block mb-1">📝</span> Form 1 (Code)
+                    CODE
                 </button>
                 <button
-                    className={`flex-1 p-3 rounded-xl border-2 transition-colors ${formType === 2 ? 'bg-blue-100 border-blue-600 text-blue-800 font-semibold' : 'bg-gray-50 border-gray-300 text-gray-600'}`}
-                    onClick={() => { setFormType(2); setFormData('code', '') }}
+                    className={`toggle-btn right ${formType === 2 ? 'active' : ''}`}
+                    onClick={() => setFormType(2)}
                 >
-                    <span className="text-2xl block mb-1">⚙️</span> Form 2(Part, Seri)
+                    PART NUMBER, SERI NUMBER
                 </button>
             </div>
-
-            {formType === 1 && <Form1Fields formData={formData} setFormData={setFormData} />}
-            {formType === 2 && <Form2Fields formData={formData} setFormData={setFormData} onToast={onToast} />}
-
-            {formType && (
-                <button className={submitClasses} onClick={onSubmit} disabled={isLoading}>
-                    {isLoading ? (
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    ) : null}
-                    {isLoading ? 'ĐANG LƯU DỮ LIỆU...' : 'GỬI DỮ LIỆU NHẬP KHO'}
+            <div style={{ flex: 1 }}>
+                {formType === 1 ? (
+                    <div>
+                        <label className="inv-label">Mã Code:</label>
+                        <input 
+                            className="inv-input-box"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                        />
+                    </div>
+                ) : (
+                    <div>
+                        <label className="inv-label">Part Number:</label>
+                        <input 
+                            className="inv-input-box"
+                            value={partNumber}
+                            onChange={(e) => setPartNumber(e.target.value)}
+                            placeholder="Nhập Part Number..."
+                        />
+                        <label className="inv-label">Seri Number:</label>
+                        <input 
+                            ref={seriInputRef}
+                            className="inv-input-box"
+                            value={seriNumber}
+                            onChange={(e) => setSeriNumber(e.target.value)}
+                            onKeyDown={handleScanComplete}
+                            onBlur={handleScanComplete}
+                            placeholder="Quét hoặc nhập Seri Number..."
+                        />
+                    </div>
+                )}
+            </div>
+            <div className="footer-actions">
+                <button className="btn-back-yellow" onClick={onBack}>
+                    &larr; Quay lại
                 </button>
+                <button className="btn-submit-blue" onClick={handleSubmit} disabled={status === 'loading'}>
+                    {status === 'loading' ? 'Đang gửi...' : 'Gửi'}
+                </button>
+            </div>
+            {/* --- Overlay Success/Error --- */}
+            {status === 'success' && (
+                <div className="result-overlay">
+                    <div className="result-box">
+                        <span className="result-icon" style={{ color: '#28a745' }}>✔</span>
+                        <p className="result-text">{message}</p>
+                    </div>
+                    <button className="btn-back-yellow" onClick={resetForm}>Tiếp tục nhập</button>
+                </div>
+            )}
+            {status === 'error' && (
+                <div className="result-overlay">
+                    <div className="result-box error">
+                        <span className="result-icon" style={{color: '#dc3545'}}>✖</span> {/* Red Cross */}
+                        <p className="result-text">{message}</p>
+                    </div>
+                    <button className="btn-back-yellow" onClick={() => setStatus('idle')}>Thử lại</button>
+                </div>
             )}
         </div>
     );

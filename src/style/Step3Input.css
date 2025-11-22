@@ -1,0 +1,58 @@
+/* Step3Input.css */
+
+.toggle-switch-container {
+    display: flex;
+    justify-content: center; /* Căn giữa 2 nút */
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.toggle-btn {
+    /* Quan trọng: Thay đổi để nút không tự kéo giãn */
+    flex: 0 0 auto; 
+    width: auto; 
+    display: inline-block;
+
+    /* Giảm padding để nút nhỏ lại, ôm sát chữ hơn */
+    padding: 6px 16px; 
+    
+    /* Cỡ chữ vừa phải */
+    font-size: 0.85rem; 
+    font-weight: 600;
+    cursor: pointer;
+    
+    /* Style cơ bản */
+    background-color: #fff;
+    color: #2c2c6a; /* Màu chữ xanh đậm */
+    border: 1px solid #2c2c6a;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Giữ chữ trên 1 dòng */
+    gap: 15px;
+}
+
+/* Nút bên trái (CODE) */
+.toggle-btn.left {
+    border-top-left-radius: 15px; /* Bo tròn kiểu viên thuốc */
+    border-bottom-left-radius: 15px;
+    border-right: none; /* Xóa viền phải để nối liền với nút kia */
+}
+
+/* Nút bên phải (PART NUMBER...) */
+.toggle-btn.right {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-left: none;
+}
+
+/* Trạng thái được chọn (Active) */
+.toggle-btn.active {
+    background-color: #28a745; /* Màu xanh lá giống thiết kế */
+    color: white;
+    border-color: #28a745;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Bóng nhẹ làm nổi bật */
+}
+
+/* Hiệu ứng hover nhẹ */
+.toggle-btn:hover:not(.active) {
+    background-color: #f0f0f0;
+}
