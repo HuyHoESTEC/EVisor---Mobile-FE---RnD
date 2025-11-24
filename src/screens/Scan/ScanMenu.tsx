@@ -7,8 +7,12 @@ import ExportWarehouseIco from '../../assets/icon/export_warehouse.png';
 import InstallationDeviceIco from '../../assets/icon/installation_device.png';
 import GotoIco from '../../assets/icon/goto.png';
 
-const ScanMenu = ({ onNavigate }) => {
-    const renderCard = (image, title, actionKey) => (
+interface ScanMenuProps {
+    onNavigate: (screen: string) => void;
+}
+
+const ScanMenu: React.FC<ScanMenuProps> = ({ onNavigate }) => {
+    const renderCard = (image: string, title: string, actionKey: string) => (
         <button className="scan-card" onClick={() => onNavigate(actionKey)}>
             <img src={image} alt={title} className="scan-card-img" />
             <span className="scan-card-text">{title}</span>

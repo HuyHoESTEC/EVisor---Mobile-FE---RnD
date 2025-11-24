@@ -5,11 +5,12 @@ import Step3Input from "./Step3Input";
 import InventoryIco from '../../../assets/icon/entered_warehouse.png';
 import ListScanIco from '../../../assets/icon/list.png';
 import '../../../style/InventoryStyle.css';
+import { BaseProps } from "../../../types/common";
 
-const InventoryFormContainer = ({ user, onToast, onBack }) => {
-    const [step, setStep] = useState(1);
-    const [projectCode, setProjectCode] = useState('');
-    const [po, setPO] = useState('');
+const InventoryFormContainer: React.FC<BaseProps> = ({ user, onToast, onBack, onNavigate }) => {
+    const [step, setStep] = useState<number>(1);
+    const [projectCode, setProjectCode] = useState<string>('');
+    const [po, setPO] = useState<string>('');
 
     const renderStepper = () => {
         return (
@@ -56,7 +57,7 @@ const InventoryFormContainer = ({ user, onToast, onBack }) => {
                         <img src={InventoryIco} alt="" className="card-icon" />
                         <span className="card-title">Nhập Kho</span>
                     </div>
-                    <button className="btn-icon-action" onClick={() => onBack('SCAN_MENU')}>
+                    <button className="btn-icon-action" onClick={() => onNavigate && onNavigate('SCAN_MENU')}>
                         <img src={ListScanIco} alt="Menu" />
                     </button>
                 </div>

@@ -7,17 +7,23 @@ import InstallationFormContainer from './screens/Scan/InstallationForm/Installat
 // import { ToastMessage } from './components/ToastMessage';
 import '../src/App.css';
 import NotFoundScreen from './screens/NotFound/NotFoundScreen';
+import { ScreenType, ToastType, User } from './types/common';
+
+interface ToastState {
+  message: string;
+  type: '' | ToastType;
+}
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [currentScreen, setCurrentScreen] = useState('LOGIN');
-  const [toast, setToast] = useState({ message: '', type: '' });
+  const [user, setUser] = useState<User | null>(null);
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('LOGIN');
+  const [toast, setToast] = useState<ToastState>({ message: '', type: '' });
   
-  const handleToast = useCallback((message, type) => {
+  const handleToast = useCallback((message: string, type: ToastType) => {
     setToast({ message, type });
   }, []);
 
-  const handleLogin = (userInfo) => {
+  const handleLogin = (userInfo: User) => {
     setUser(userInfo);
     setCurrentScreen('HOME');
   };
@@ -28,7 +34,7 @@ function App() {
     handleToast("Đã đăng xuất.", 'success');
   };
 
-  const handleNavigate = useCallback((screen) => {
+  const handleNavigate = useCallback((screen: ScreenType) => {
     setCurrentScreen(screen);
   }, []);
 
@@ -44,9 +50,9 @@ function App() {
       case 'SCAN_MENU':
         return <ScanMenu onNavigate={handleNavigate} />;
       case 'INVENTORY_FORM':
-        return <InventoryFormContainer user={user} onToast={handleToast} onBack={() => handleNavigate('SCAN_MENU')} />;
+        return <InventoryFormContainer user={user} onToast={handleToast} onBack={() => handleNavigate('SCAN_MENU')} onNavigate={handleNavigate} />;
       case 'INSTALLATION_FORM':
-        return <InstallationFormContainer user={user} onToast={handleToast} onBack={() => handleNavigate('SCAN_MENU')} />;
+        return <InstallationFormContainer user={user} onToast={handleToast} onBack={() => handleNavigate('SCAN_MENU')} onNavigate={handleNavigate} />;
       case 'SETTINGS':
         return <NotFoundScreen />;
       case 'INFORMATION':

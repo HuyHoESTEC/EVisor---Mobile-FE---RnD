@@ -1,11 +1,17 @@
-import { useState } from "react"
+import React, { ChangeEvent, useState } from "react"
 import { loginUser } from "../../api";
 import '../../style/LoginScreen.css';
+import { ToastType, User } from "../../types/common";
 
-const LoginScreen = ({ onLogin, onToast }) => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+interface LoginScreenProps {
+    onLogin: (user: User) => void;
+    onToast: (message: string, type: ToastType) => void;
+}
+
+const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
+    const [username, setUsername] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -14,14 +20,23 @@ const LoginScreen = ({ onLogin, onToast }) => {
         }
         setIsLoading(true);
         try {
-            const userData = await loginUser({ username, password });
+            const userData: User = await loginUser({ username, password });
             onLogin(userData);
             onToast("Đăng nhập thành công!", 'success');
         } catch (error) {
-            onToast(`Lỗi: ${error.message}`, 'error');
+            const errorMessage = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định.";
+            onToast(`Lỗi: ${errorMessage}`, 'error');
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handeUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setUsername(e.target.value);
+    };
+
+    const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
     };
 
     const loginClasses = `btn-primary btn-primary-blue ${isLoading ? 'btn-loading' : ''}`;
@@ -38,7 +53,7 @@ const LoginScreen = ({ onLogin, onToast }) => {
                         className="input-field"
                         type="text"
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={handeUsernameChange}
                         placeholder="Tên đăng nhập"
                         disabled={isLoading}
                     />
@@ -47,7 +62,7 @@ const LoginScreen = ({ onLogin, onToast }) => {
                         className="input-field"
                         type="password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={handlePasswordChange}
                         placeholder="Mật khẩu"
                         disabled={isLoading}
                     />

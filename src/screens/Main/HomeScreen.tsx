@@ -10,8 +10,15 @@ import EstecLogo from '../../assets/logos/estec-logo.svg';
 import LogoutIcon from '../../assets/icon/logout.png';
 import UserIcon from '../../assets/icon/user.png';
 import '../../style/HomeScreen.css';
+import { ScreenType, User } from "../../types/common";
 
-const HomeScreen = ({ user, onLogout, onNavigate }) => {
+interface HomeScreenProps {
+    user: User;
+    onLogout: () => void;
+    onNavigate: (screen: ScreenType) => void;
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ user, onLogout, onNavigate }) => {
     const currentYear = new Date().getFullYear();
 
     return (
@@ -32,36 +39,37 @@ const HomeScreen = ({ user, onLogout, onNavigate }) => {
                         icon={ScanIcon}
                         title="Scan / Nhập liệu"
                         onClick={() => onNavigate('SCAN_MENU')}
+                        disabled={false}
                     />
                     <MenuCard 
                         icon={InformationIcon}
                         title="Information"
                         onClick={() => onNavigate('INFORMATION')}
-                        disableVal="True"
+                        disabled={true}
                     />
                     <MenuCard 
                         icon={SettingIcon}
                         title="Settings"
                         onClick={() => onNavigate('SETTINGS')}
-                        disableVal="True"
+                        disabled={true}
                     />
                     <MenuCard 
                         icon={DashboardIcon}
                         title="Dashboard"
                         onClick={() => onNavigate('DASHBOARD')}
-                        disableVal="True"
+                        disabled={true}
                     />
                     <MenuCard 
                         icon={WorkIcon}
                         title="Work"
                         onClick={() => onNavigate('WORK_MANAGEMENT')}
-                        disableVal="True"
+                        disabled={true}
                     />
                     <MenuCard 
                         icon={WarehouseIcon}
                         title="Warehouse"
                         onClick={() => onNavigate('WAREHOUSE_MANAGEMENT')}
-                        disableVal="True"
+                        disabled={true}
                     />
                 </div>
             </div>

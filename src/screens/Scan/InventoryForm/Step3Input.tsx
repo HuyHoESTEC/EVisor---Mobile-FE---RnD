@@ -1,27 +1,34 @@
 import React, { useRef, useState } from "react";
 import '../../../style/Step3Input.css';
 import { submitFormData } from "../../../api";
+import { BaseProps } from "../../../types/common";
 
-const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
+interface Step3InputProps extends BaseProps {
+    projectCode: string;
+    po: string;
+}
+
+const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, onToast }) => {
     // 1. Form Code, 2. Form Part/Seri
-    const [formType, setFormType] = useState(2);
+    const [formType, setFormType] = useState<number>(2);
     // Form Data
-    const [code, setCode] = useState('');
-    const [partNumber, setPartNumber] = useState('');
-    const [seriNumber, setSeriNumber] = useState('');
+    const [code, setCode] = useState<string>('');
+    const [partNumber, setPartNumber] = useState<string>('');
+    const [seriNumber, setSeriNumber] = useState<string>('');
     // Submission Status: 'idle' | 'loading' | 'success' | 'error'
-    const [status, setStatus] = useState('idle');
-    const [message, setMessage] = useState('');
-    const seriInputRef = useRef(null);
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [message, setMessage] = useState<string>('');
+    const seriInputRef = useRef<HTMLInputElement>(null);
 
-    const handleScanComplete = (e) => {
-        if (e.key === 'Enter' || e.target === 'blur') {
-            const scannedValue = e.target.value.trim();
+    const handleScanComplete = (e: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
+        if ((e as React.KeyboardEvent).key === 'Enter' || e.type === 'blur') {
+            const target = e.target as HTMLInputElement;
+            const scannedValue = target.value.trim();
             if (scannedValue && scannedValue.length > 5) {
                 setSeriNumber(scannedValue);
                 onToast(`Mã Seri đã được quét: ${scannedValue}`, 'success');
             }
-            if (e.key === 'Enter') {
+            if ((e as React.KeyboardEvent).key === 'Enter') {
                 e.preventDefault();
             }
         }
@@ -35,7 +42,7 @@ const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
                 po,
                 type: formType === 1 ? 'CODE' : 'PART_SERI',
                 data: formType === 1 ? { code } : { partNumber, seriNumber },
-                owner: user.owner
+                owner: user?.owner
             };
             await submitFormData({ data: payload, formType });
             // Resolve success

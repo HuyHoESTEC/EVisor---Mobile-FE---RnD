@@ -4,11 +4,11 @@ import Step2Input from "./Step2Input";
 import InstallationIco from '../../../assets/icon/installation_device.png';
 import ListScanIco from '../../../assets/icon/list.png';
 import '../../../style/InstallationStyle.css';
+import { BaseProps } from "../../../types/common";
 
-const TOTAL_STEPS = 2;
-const InstallationFormContainer = ({ user, onToast, onBack }) => {
-    const [step, setStep] = useState(1);
-    const [projectCode, setProjectCode] = useState('');
+const InstallationFormContainer: React.FC<BaseProps> = ({ user, onToast, onBack, onNavigate }) => {
+    const [step, setStep] = useState<number>(1);
+    const [projectCode, setProjectCode] = useState<string>('');
 
     const renderStepper = () => {
         return (
@@ -42,7 +42,7 @@ const InstallationFormContainer = ({ user, onToast, onBack }) => {
                         <img src={InstallationIco} alt="" className="card-icon" />
                         <span className="card-title">Lắp Đặt</span>
                     </div>
-                    <button className="btn-icon-action" onClick={() => onBack('SCAN_MENU')}>
+                    <button className="btn-icon-action" onClick={() => onNavigate && onNavigate('SCAN_MENU')}>
                         <img src={ListScanIco} alt="Menu" />
                     </button>
                 </div>

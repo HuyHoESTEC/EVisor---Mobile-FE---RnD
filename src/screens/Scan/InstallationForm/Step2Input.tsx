@@ -1,25 +1,31 @@
 import React, { useRef, useState } from "react";
 import { submitFormData } from "../../../api";
+import { BaseProps } from "../../../types/common";
 
-const Step2Input = ({ user, projectCode, onBack, onToast }) => {
+interface Step2InputInstallationProps extends BaseProps {
+    projectCode: string;
+}
+
+const Step2Input: React.FC<Step2InputInstallationProps> = ({ user, projectCode, onBack, onToast }) => {
     // Form Data
-    const [location, setLocation] = useState('');
-    const [cabinetNo, setCabinetNo] = useState('');
-    const [code, setCode] = useState('');
+    const [location, setLocation] = useState<string>('');
+    const [cabinetNo, setCabinetNo] = useState<string>('');
+    const [code, setCode] = useState<string>('');
     // Ref for Code field to resolve scan device
-    const codeInputRef = useRef(null);
+    const codeInputRef = useRef<HTMLInputElement>(null);
     // Status
-    const [status, setStatus] = useState('idle');
-    const [message, setMessage] = useState('');
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [message, setMessage] = useState<string>('');
     // Resolve scan for Code field
-    const handleScanComplete = (e) => {
-        if (e.key === 'Enter' || e.type === 'blur') {
-            const scannedValue = e.target.value.trim();
+    const handleScanComplete = (e: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
+        if ((e as React.KeyboardEvent).key === 'Enter' || e.type === 'blur') {
+            const target = e.target as HTMLInputElement;
+            const scannedValue = target.value.trim();
             if (scannedValue) {
                 setCode(scannedValue);
                 onToast(`Đã quét code: ${scannedValue}`, 'success');
             }
-            if (e.key === 'Enter') e.preventDefault();
+            if ((e as React.KeyboardEvent).key === 'Enter') e.preventDefault();
         }
     };
 

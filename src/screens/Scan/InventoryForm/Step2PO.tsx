@@ -1,6 +1,12 @@
 import React from "react";
 
-const Step2PO = ({ projectCode, po, setPO }) => {
+interface Step2POProps {
+    projectCode: string;
+    po: string;
+    setPO: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Step2PO: React.FC<Step2POProps> =  ({ projectCode, po, setPO }) => {
     return (
         <div style={{ textAlign: 'center' }}>
             {/* Hiển thị lại Project đã nhập ở step 1 để đối chiếu */}

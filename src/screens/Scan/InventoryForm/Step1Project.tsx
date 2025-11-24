@@ -1,6 +1,11 @@
 import React from "react";
 
-const Step1Project = ({ projectCode, setProjectCode }) => {
+interface Step1ProjectProps {
+    projectCode: string;
+    setProjectCode: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Step1Project: React.FC<Step1ProjectProps> = ({ projectCode, setProjectCode }) => {
     return (
         <div style={{ textAlign: 'center' }}>
             <h3 style={{ marginBottom: '20px', color: '#2c2c6a' }}>Nhập Mã Dự Án</h3>

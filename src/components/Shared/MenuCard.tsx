@@ -1,12 +1,19 @@
 import React from "react";
 import '../../style/MenuCard.css';
 
-const MenuCard = ({ icon, title, onClick, disableVal }) => {
+interface MenuCardProps {
+    icon: string;
+    title: string;
+    onClick: () => void;
+    disabled?: boolean;
+}
+
+const MenuCard: React.FC<MenuCardProps> = ({ icon, title, onClick, disabled })  => {
     return (
         <button
             className="menu-card"                                           
             onClick={onClick}
-            disabled={disableVal}
+            disabled={disabled}
         >
             <span className="menu-card__icon">
                 <img src={icon} alt={title} className="menu-card__icon-img" />
