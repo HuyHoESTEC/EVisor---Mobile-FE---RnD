@@ -83,6 +83,7 @@ const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
                             className="inv-input-box"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
+                            placeholder="Nhập mã Code hàng hóa..."
                         />
                     </div>
                 ) : (
@@ -103,6 +104,7 @@ const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
                             onKeyDown={handleScanComplete}
                             onBlur={handleScanComplete}
                             placeholder="Quét hoặc nhập Seri Number..."
+                            style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
                         />
                     </div>
                 )}
@@ -112,7 +114,7 @@ const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
                     &larr; Quay lại
                 </button>
                 <button className="btn-submit-blue" onClick={handleSubmit} disabled={status === 'loading'}>
-                    {status === 'loading' ? 'Đang gửi...' : 'Gửi'}
+                    {status === 'loading' ? 'Đang gửi...' : 'Gửi'} &#10146;
                 </button>
             </div>
             {/* --- Overlay Success/Error --- */}
@@ -131,7 +133,7 @@ const Step3Input = ({ projectCode, po, onBack, user, onToast }) => {
                         <span className="result-icon" style={{color: '#dc3545'}}>✖</span> {/* Red Cross */}
                         <p className="result-text">{message}</p>
                     </div>
-                    <button className="btn-back-yellow" onClick={() => setStatus('idle')}>Thử lại</button>
+                    <button className="btn-back-yellow" onClick={() => setStatus('idle')}>Thử lại &#8635;</button>
                 </div>
             )}
         </div>

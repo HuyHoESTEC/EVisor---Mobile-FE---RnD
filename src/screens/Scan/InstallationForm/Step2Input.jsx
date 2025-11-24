@@ -1,53 +1,122 @@
-import React from "react";
+import React, { useRef, useState } from "react";
+import { submitFormData } from "../../../api";
 
-const Step2Input = ({ formData, setFormData, onSubmit, finalProjectCode, isLoading }) => {
-    const submitClasses = `btn-primary btn-submit-green ${isLoading ? 'btn-loading' : ''}`;
+const Step2Input = ({ user, projectCode, onBack, onToast }) => {
+    // Form Data
+    const [location, setLocation] = useState('');
+    const [cabinetNo, setCabinetNo] = useState('');
+    const [code, setCode] = useState('');
+    // Ref for Code field to resolve scan device
+    const codeInputRef = useRef(null);
+    // Status
+    const [status, setStatus] = useState('idle');
+    const [message, setMessage] = useState('');
+    // Resolve scan for Code field
+    const handleScanComplete = (e) => {
+        if (e.key === 'Enter' || e.type === 'blur') {
+            const scannedValue = e.target.value.trim();
+            if (scannedValue) {
+                setCode(scannedValue);
+                onToast(`Đã quét code: ${scannedValue}`, 'success');
+            }
+            if (e.key === 'Enter') e.preventDefault();
+        }
+    };
+
+    const handleSubmit = async () => {
+        // Validate
+        if (!location || !cabinetNo || !code) {
+            onToast("Vui lòng điền đầy đủ thông tin: Dãy, Tủ và Code", 'error');
+            return;
+        }
+        
+        setStatus('loading');
+        try {
+            const payload = {
+                projectCode,
+                location,
+                cabinet_no: cabinetNo,
+                owner: user?.owner
+            };
+            await submitFormData({ data: payload, formType: 'INSTALLATION' });
+            setStatus('success');
+            setMessage('Lưu dữ liệu lắp đặt thành công');
+        } catch (error) {
+            console.log(error);
+            setStatus('error');
+            setMessage('Lỗi: Dữ liệu có thể đã tồn tại hoặc lỗi mạng');
+        }
+    };
+
+    const resetForm = () => {
+        setStatus('idle');
+        // Reset code to write the next code, keep location and cabinat (usually installation same area)
+        setCode('');
+        // Focus again code field to continue scan
+        setTimeout(() => {
+            if (codeInputRef.current) codeInputRef.current.focus();
+        }, 100);
+    };
 
     return (
-        <div className="step-content-card">
-            <h2 className="text-xl font-semibold mb-4 text-blue-600">2. Nhập thông tin lắp đặt & Gửi</h2>
-            <div className="info-display-grid mb-6">
-                <div>
-                    <label className="info-label">Dự án</label>
-                    <input className="info-value-field" value={finalProjectCode} readOnly />
+        <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginBottom: '15px' }}>
+                <label className="ist-label">Mã dự án:</label>
+                <input className="ist-input-box" value={projectCode} readOnly />
+            </div>
+            <div style={{ flex: 1 }} className="form-animation">
+                <label className="ist-label">Mã Dãy:</label>
+                <input 
+                    className="ist-input-box"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Nhập mã dãy..."
+                />
+                <label className="ist-label">Mã Tủ:</label>
+                <input 
+                    className="ist-input-box"
+                    value={cabinetNo}
+                    onChange={(e) => setCabinetNo(e.target.value)}
+                    placeholder="Nhập mã tủ..."
+                />
+                <label className="ist-label">Mã Code:</label>
+                <input 
+                    ref={codeInputRef}
+                    className="ist-input-box"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    onKeyDown={handleScanComplete}
+                    onBlur={handleScanComplete}
+                    placeholder="Quét hoặc nhập Code thiết bị..."
+                    style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
+                />
+            </div>
+            <div className="footer-actions">
+                <button className="btn-back-yellow" onClick={onBack}>
+                    &larr; Quay lại
+                </button>
+                <button className="btn-submit-blue" onClick={handleSubmit} disabled={status === 'loading'}>
+                    {status === 'loading' ? 'Đang lưu...' : 'Lưu dữ liệu'}
+                </button>
+            </div>
+            {status === 'success' && (
+                <div className="result-overlay">
+                    <div className="result-box">
+                        <span className="result-icon" style={{ color: '#28a745' }}>✔</span>
+                        <p className="result-text">{message}</p>
+                    </div>
+                    <button className="btn-back-yellow" onClick={resetForm}>Tiếp tục lắp đặt</button>
                 </div>
-            </div>
-
-            <div className="form-group space-y-4">
-                <label className="form-label block">Dãy</label>
-                <input 
-                    className="input-field"
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData('location', e.target.value)}
-                    placeholder="Example: Dãy x"
-                />
-
-                <label className="form-label block">Số hiệu tủ</label>
-                <input 
-                    className="input-field"
-                    type="text"
-                    value={formData.cabinet_no}
-                    onChange={(e) => setFormData('cabinet_no', e.target.value)}
-                    placeholder="Example: C01-R03"
-                />
-
-                <label className="form-label block">Mã Code</label>
-                <input 
-                    className="input-field"
-                    type="text"
-                    value={formData.code}
-                    onChange={(e) => setFormData('code', e.target.value)}
-                    placeholder="Nhập Mã Code Thiết Bị"
-                />
-            </div>
-
-            <button className={submitClasses} onClick={onSubmit} disabled={isLoading}>
-                {isLoading ? (
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                ) : null}
-                {isLoading ? 'ĐANG LƯU DỮ LIỆU...' : 'HOÀN TẤT  & GỬI DỮ LIỆU'}
-            </button>
+            )}
+            {status === 'error' && (
+                <div className="result-overlay">
+                    <div className="result-box">
+                        <span className="result-icon" style={{ color: '#dc3545' }}>✖</span>
+                        <p className="result-text">{message}</p>
+                    </div>
+                    <button className="btn-back-yellow" onClick={() => setStatus('idle')}>Thử lại &#8635;</button>
+                </div>
+            )}
         </div>
     );
 };
