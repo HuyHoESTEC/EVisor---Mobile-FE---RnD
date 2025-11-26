@@ -1,6 +1,7 @@
 export interface User {
     owner: string;
     token: string;
+    expires_at: string;
 }
 // Define props for navigation/notification function
 export interface BaseProps {
@@ -68,3 +69,15 @@ export interface SubmitPayload {
     request_id: string;
     form: AllFormTypes;
 } 
+
+export interface LoginResponse {
+    status: string;
+    authentication: string;
+    user_id?: string; // Use to owner
+    full_name: string;
+    message: string;
+    session_id?: string; // Use to token
+    expires_at?: string; // Use to calculator expire time
+}
+
+export const AUTH_FAILURE_MESSAGE = "Tên đăng nhập hoặc mật khẩu không đúng!";

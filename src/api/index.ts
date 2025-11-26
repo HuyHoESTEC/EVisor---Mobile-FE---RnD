@@ -1,23 +1,46 @@
 import axios, { AxiosError } from "axios";
-import { LoginPayload, User, SubmitPayload, SubmitFormType } from "../types/common";
+import { LoginPayload, User, SubmitPayload, SubmitFormType, LoginResponse } from "../types/common";
 
 const API_BASE: string = (import.meta as any).env.VITE_EVS_API_BASE;
 const FORM_1_API: string = `${API_BASE}/WS/WarehouseImport/Scan/Form1`;
 const FORM_2_API: string = `${API_BASE}/WS/WarehouseImport/Scan/Form2`;
 const FORM_INSTALLATION_API:string = `${API_BASE}/WS/WarehouseInstallation/Scan/Form1`;
+const LOGIN_API:string = `${API_BASE}/Login`;
 
 export const loginUser = async ({ username, password }: LoginPayload): Promise<User> => {
     const LoginPayload: LoginPayload = { username, password };
-    console.log('Payload đăng nhập:', LoginPayload);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+        const response = await axios.post<LoginResponse>(LOGIN_API, LoginPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (response.data.authentication === 'success' && response.data.status === 'success') {
+            if (!response.data.user_id || !response.data.session_id || !response.data.expires_at) {
+                throw new Error("Phản hồi máy chủ thiếu thông tin phiên làm việc.");
+            }
 
-    if (username === 'tester' && password === '123') {
-        return {
-            owner: username,
-            token: 'mock-jwt-token'
-        } as User;
-    } else {
-        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+            return {
+                owner: response.data.user_id,
+                token: response.data.session_id,
+                expires_at: response.data.expires_at,
+            } as User;
+        } else if (response.data.authentication === 'failed') {
+            throw new Error(response.data.message || "Tên đăng nhập hoặc mật khẩu không chính xác");
+        }
+        throw new Error(response.data.message || "Đăng nhập thất bại!");
+    } catch (error) {
+        let errorMessage: string = "Lỗi kết nối mạng hoặc máy chủ không phản hồi.";
+        const axiosError = error as AxiosError;
+        // Resolve error HTTP (Examp: 404, 500)
+        if (axiosError.response) {
+            const serverMessage = (axiosError.response.data as any)?.message;
+            errorMessage = serverMessage || `Lỗi API (Status: ${axiosError.response.status})`;
+        // Resolve request error (Examp: No connect internet)
+        } else if (axiosError.request) {
+            errorMessage = "Máy chủ không phản hồi. Vui lòng kiểm tra kết nối mạng.";
+        }
+        throw new Error(errorMessage);
     }
 };
 

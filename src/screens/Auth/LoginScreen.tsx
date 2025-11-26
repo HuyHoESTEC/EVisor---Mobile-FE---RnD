@@ -1,7 +1,8 @@
 import React, { ChangeEvent, useState } from "react"
 import '../../style/LoginScreen.css';
-import { ToastType, User } from "../../types/common";
+import { ToastType, User, AUTH_FAILURE_MESSAGE } from "../../types/common";
 import { loginUser } from "../../api";
+import EstecLogo from '../../assets/logos/estec-logo.svg';
 
 interface LoginScreenProps {
     onLogin: (user: User) => void;
@@ -13,11 +14,31 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
     const [password, setPassword] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    // State show error management inline
+    const [usernameError, setUsernameError] = useState<string>('');
+    const [passwordError, setPasswordError] = useState<string>('');
+    const [generalError, setGeneralError] = useState<string>('');
+
     const handleLogin = async () => {
-        if (!username || !password) {
-            onToast("Vui lòng điền Tên đăng nhập và Mật khẩu.", 'error');
+        // Reset error before validate
+        setUsernameError('');
+        setPasswordError('');
+        setGeneralError('');
+
+        let isValid = true;
+
+        if (!username) {
+            setUsernameError('Tên đăng nhập không được để trống!');
+            isValid = false;
+        }
+        if (!password) {
+            setPasswordError('Mật khẩu không được để trống!');
+            isValid = false;
+        }
+        if (!isValid) {
             return;
         }
+
         setIsLoading(true);
         try {
             const userData: User = await loginUser({ username, password });
@@ -25,7 +46,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
             onToast("Đăng nhập thành công!", 'success');
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định.";
-            onToast(`Lỗi: ${errorMessage}`, 'error');
+
+            if (errorMessage.includes(AUTH_FAILURE_MESSAGE)) {
+                setGeneralError(errorMessage);
+            } else {
+                onToast(`Lỗi: ${errorMessage}`, 'error');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -33,48 +59,58 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
 
     const handeUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
         setUsername(e.target.value);
+        setUsernameError(''); // Delete error when user start typing...
+        setGeneralError('');
     };
 
     const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value);
+        setPasswordError(''); // Delete error when user start typing...
+        setGeneralError('');
     };
 
-    const loginClasses = `btn-primary btn-primary-blue ${isLoading ? 'btn-loading' : ''}`;
+    const loginClasses = `btn-primary login-button ${isLoading ? 'btn-loading' : ''}`;
 
     return (
         <div className="login-container">
-            <header className="app-header">
-                <h1 className="header-title">Đăng nhập hệ thống</h1>
-            </header>
-            <main className="app-main">
-                <div className="step-card">
-                    <label className="form-label">Tên đăng nhập</label>
-                    <input 
-                        className="input-field"
-                        type="text"
-                        value={username}
-                        onChange={handeUsernameChange}
-                        placeholder="Tên đăng nhập"
-                        disabled={isLoading}
-                    />
-                    <label className="form-label">Mật khẩu</label>
-                    <input 
-                        className="input-field"
-                        type="password"
-                        value={password}
-                        onChange={handlePasswordChange}
-                        placeholder="Mật khẩu"
-                        disabled={isLoading}
-                    />
-                    <button
-                        className={loginClasses}
-                        onClick={handleLogin}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'ĐANG XỬ LÝ...' : "ĐĂNG NHẬP"}
-                    </button>
+            <div className="login-form-card">
+                <div className="logo-section">
+                    <img src={EstecLogo} alt="ESTEC Logo" className="estec-logo" />
+                    <h2 className="login-title">Đăng Nhập</h2>
                 </div>
-            </main>
+                <div className="divider-line"></div>
+                <label className="form-label">Tên đăng nhập:</label>
+                <input 
+                    className={`input-field input-field-grey ${usernameError || generalError ? 'input-error' : ''}`}
+                    type="text"
+                    value={username}
+                    onChange={handeUsernameChange}
+                    placeholder='Nhập tên đăng nhập...'
+                    disabled={isLoading}
+                />
+                {(usernameError || generalError) && (
+                    <p className="error-text-inline">{generalError || usernameError}</p>
+                )}
+                <label className="form-label">Mật Khẩu:</label>
+                <input 
+                    className={`input-field input-field-grey ${passwordError || generalError ? 'input-error' : ''}`}
+                    type="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    placeholder="*****"
+                    disabled={isLoading}
+                />
+                {passwordError && (
+                    <p className="error-text-inline">{passwordError}</p>
+                )}
+                <button
+                    className={loginClasses}
+                    onClick={handleLogin}
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG NHẬP'}
+                </button>
+            </div>
         </div>
     );
 };

@@ -1,100 +1,140 @@
+/* LoginScreen.css */
+
+/* --- 1. Container (Background và Căn giữa) --- */
 .login-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-image: url(../assets/banner/EVS_BG_MB.png);
+    /* Giả định EVS_BG_MB.png là background pattern */
+    background-image: url(../assets/banner/EVS_BG_MB.png); 
     padding: 20px;
-    height: 96vh;
+    height: 100vh; /* Đảm bảo che phủ toàn màn hình */
     width: 100vw;
+    /* Loại bỏ app-header và app-main cũ */
 }
 
-.app-header {
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-/* Tiêu đề chính */
-.header-title {
-    font-size: 24px;
-    color: white;
-    font-weight: 600;
-}
-
-.app-main {
-    width: 100%;
-    max-width: 400px;
-}
-
-.step-card {
+/* --- 2. Login Form Card (Box trung tâm) --- */
+/* Thay thế .step-card/app-main cũ */
+.login-form-card {
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25); /* Shadow rõ hơn */
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 380px; /* Kích thước tối đa của form */
 }
 
+/* --- 3. Logo và Tiêu đề Card --- */
+.logo-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; 
+    margin-bottom: 10px;
+}
+
+.estec-logo {
+    width: 144px;
+    height: 100px;
+    position: absolute;
+}
+
+.login-title {
+    /* "Đăng nhập" */
+    font-size: 27px;
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serifs;
+    color: #2c2c6a;
+    flex-grow: 1; 
+    text-align: right;
+}
+
+.divider-line {
+    /* Dấu gạch ngang đứt đoạn phân cách header */
+    height: 1px;
+    border-bottom: 1px dashed #ccc;
+    margin: 5px 0 20px 0;
+}
+
+
+/* --- 4. Form Labels và Input Fields --- */
 .form-label {
-    font-size: 14px;
-    color: #555;
-    font-weight: 500;
-    margin-bottom: 4px;
+    font-size: 18px; /* Lớn hơn, đậm hơn */
+    color: #333;
+    font-weight: 600; 
+    margin-bottom: 8px;
+    margin-top: 15px; 
+    text-align: center;
 }
 
-/* Trường input */
 .input-field {
     width: 100%;
-    padding: 10px 12px;
+    padding: 14px 15px; /* Padding lớn hơn */
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
-    transition: border-color 0.3s;
-    background-color: whitesmoke;
-    color: black;
+    margin-bottom: 10px; 
+    transition: all 0.2s;
+    text-align: center; /* Căn giữa text nhập vào theo thiết kế */
+}
+
+/* Màu xám cho input theo thiết kế */
+.input-field-grey {
+    background-color: #e0e0e0; 
+    border-color: #e0e0e0;
+    color: #555;
+    font-weight: 500;
+}
+
+/* Lỗi Input */
+.input-error {
+    border-color: #dc3545 !important; 
+    box-shadow: 0 0 0 1px #dc3545;
 }
 
 .input-field:focus {
     outline: none;
+    border-color: #3f51b5;
 }
 
-.input-field:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
+/* --- 5. Error Message Inline --- */
+.error-text-inline {
+    color: #dc3545; /* Màu đỏ */
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: -5px; 
+    margin-bottom: 10px;
+    text-align: center; 
 }
 
+
+/* --- 6. Button --- */
 .btn-primary {
-    padding: 12px 20px;
+    padding: 14px 20px;
     border: none;
     border-radius: 4px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s, opacity 0.3s;
-    text-transform: uppercase;
+    text-transform: none; /* Dùng text-transform: none theo thiết kế */
+    margin-top: 25px;
 }
 
-.btn-primary:hover:not(:disabled) {
-    opacity: 0.9;
+/* Dark blue/Indigo Button (Login) */
+.login-button {
+    background-color: #3f51b5; /* Màu xanh đậm theo thiết kế */
+    color: white;
+}
+
+.login-button:hover:not(:disabled) {
+    background-color: #303f9f;
 }
 
 .btn-primary:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-/* Button màu xanh */
-.btn-primary-blue {
-    background-color: #007bff; /* Màu xanh dương */
-    color: white;
-}
-
-/* Hiệu ứng khi đang tải (loading) */
-.btn-loading {
-    /* Thêm hiệu ứng loading nếu cần, ví dụ: */
-    position: relative;
-    /* Dùng background-color nhẹ hơn để chỉ ra trạng thái */
-    background-color: #0056b3; 
 }
