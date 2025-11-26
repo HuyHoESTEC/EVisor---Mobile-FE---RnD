@@ -10,7 +10,7 @@ interface Step3InputProps extends BaseProps {
 
 const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, onToast }) => {
     // 1. Form Code, 2. Form Part/Seri
-    const [formType, setFormType] = useState<number>(2);
+    const [formType, setFormType] = useState<number>(1);
     // Form Data
     const [code, setCode] = useState<string>('');
     const [partNumber, setPartNumber] = useState<string>('');

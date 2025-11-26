@@ -15,7 +15,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const storedUser = localStorage.getItem('currentUser');
         const initialUser: User | null = storedUser ? JSON.parse(storedUser) : null;
 
-        if (initialUser && isSessionExpired(initialUser.expired_at)) {
+        if (initialUser && isSessionExpired(initialUser.expires_at)) {
             // If work session expire while start, delete it
             localStorage.removeItem('currentUser');
             return null;

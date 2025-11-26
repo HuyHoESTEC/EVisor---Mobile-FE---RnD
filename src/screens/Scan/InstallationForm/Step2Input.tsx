@@ -40,8 +40,8 @@ const Step2Input: React.FC<Step2InputInstallationProps> = ({ projectCode, onBack
             // Create InstallationForm payload
             const formPayload: InstallationForm = {
                 project_code: projectCode,
-                location: location,
-                cabinet_no: cabinetNo,
+                location: cabinetNo,
+                cabinet_no: location,
                 code: code
             };
             // Create request_id and SubmitPayload
