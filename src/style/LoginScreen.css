@@ -18,7 +18,7 @@
 /* Thay thế .step-card/app-main cũ */
 .login-form-card {
     background-color: #fff;
-    padding: 30px;
+    padding: 30px 20px;
     border-radius: 8px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25); /* Shadow rõ hơn */
     display: flex;
@@ -37,7 +37,7 @@
 }
 
 .estec-logo {
-    width: 144px;
+    width: 130px;
     height: 100px;
     position: absolute;
 }
