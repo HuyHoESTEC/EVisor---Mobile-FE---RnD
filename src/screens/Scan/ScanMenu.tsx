@@ -6,13 +6,14 @@ import EnteredWarehouseIco from '../../assets/icon/entered_warehouse.png';
 import ExportWarehouseIco from '../../assets/icon/export_warehouse.png';
 import InstallationDeviceIco from '../../assets/icon/installation_device.png';
 import GotoIco from '../../assets/icon/goto.png';
+import { ScreenType } from "../../types/common";
 
 interface ScanMenuProps {
-    onNavigate: (screen: string) => void;
+    onNavigate: (screen: ScreenType) => void;
 }
 
 const ScanMenu: React.FC<ScanMenuProps> = ({ onNavigate }) => {
-    const renderCard = (image: string, title: string, actionKey: string) => (
+    const renderCard = (image: string, title: string, actionKey: ScreenType) => (
         <button className="scan-card" onClick={() => onNavigate(actionKey)}>
             <img src={image} alt={title} className="scan-card-img" />
             <span className="scan-card-text">{title}</span>

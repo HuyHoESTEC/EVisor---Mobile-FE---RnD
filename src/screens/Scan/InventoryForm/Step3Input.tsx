@@ -162,25 +162,6 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, 
                     {status === 'loading' ? 'Đang gửi...' : 'Gửi'} &#10146;
                 </button>
             </div>
-            {/* --- Overlay Success/Error --- */}
-            {status === 'success' && (
-                <div className="result-overlay">
-                    <div className="result-box">
-                        <span className="result-icon" style={{ color: '#28a745' }}>✔</span>
-                        <p className="result-text">{message}</p>
-                    </div>
-                    <button className="btn-back-yellow" onClick={resetForm}>Tiếp tục nhập</button>
-                </div>
-            )}
-            {status === 'error' && (
-                <div className="result-overlay">
-                    <div className="result-box error">
-                        <span className="result-icon" style={{color: '#dc3545'}}>✖</span> {/* Red Cross */}
-                        <p className="result-text">{message}</p>
-                    </div>
-                    <button className="btn-back-yellow" onClick={() => setStatus('idle')}>Thử lại &#8635;</button>
-                </div>
-            )}
         </div>
     );
 };

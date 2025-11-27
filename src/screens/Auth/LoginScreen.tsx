@@ -50,11 +50,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
             if (errorMessage.includes(AUTH_FAILURE_MESSAGE)) {
                 setGeneralError(errorMessage);
             } else {
-                onToast(`Lỗi: ${errorMessage}`, 'error');
+                onToast(`${errorMessage}`, 'error');
             }
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !isLoading) {
+            e.preventDefault();
+            handleLogin();
+        } 
     };
 
     const handeUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -85,6 +92,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
                     type="text"
                     value={username}
                     onChange={handeUsernameChange}
+                    onKeyDown={handleKeyDown}
                     placeholder='Nhập tên đăng nhập...'
                     disabled={isLoading}
                 />
@@ -97,6 +105,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onToast }) => {
                     type="password"
                     value={password}
                     onChange={handlePasswordChange}
+                    onKeyDown={handleKeyDown}
                     placeholder="*****"
                     disabled={isLoading}
                 />

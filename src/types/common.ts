@@ -8,7 +8,7 @@ export interface BaseProps {
     user?: User;
     onToast: (message: string, type: 'success' | 'error' | 'info') => void;
     onBack: () => void;
-    onNavigate?: (screen: string) => void;
+    onNavigate?: (screen: ScreenType) => void;
 }
 // Interface for Project (Use at step 1)
 export interface ProjectItem {
@@ -29,6 +29,7 @@ export type ScreenType =
     | 'DASHBOARD'
     | 'WORK_MANAGEMENT'
     | 'WAREHOUSE_MANAGEMENT'
+    | 'EXPORT_FORM'
     | 'INFO';
 // Data type for list (Project, PO)
 export interface SelectOption {
@@ -80,4 +81,4 @@ export interface LoginResponse {
     expires_at?: string; // Use to calculator expire time
 }
 
-export const AUTH_FAILURE_MESSAGE = "Tên đăng nhập hoặc mật khẩu không đúng!";
+export const AUTH_FAILURE_MESSAGE = "Tên đăng nhập hoặc mật khẩu không chính xác!";

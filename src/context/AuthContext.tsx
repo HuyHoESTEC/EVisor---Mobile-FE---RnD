@@ -1,15 +1,15 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { User } from "../types/common";
+import { ToastType, User } from "../types/common";
 
 interface AuthContextType {
     user: User | null;
     login: (userData: User) => void;
-    logout: () => void;
+    logout: (showToast?: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode, onToast: (message: string, type: ToastType) => void }> = ({ children, onToast }) => {
     // Loading user information from local storage when mount
     const [user, setUser] = useState<User | null>(() => {
         const storedUser = localStorage.getItem('currentUser');
@@ -36,9 +36,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(userData);
     };
 
-    const logout = () => {
+    const logout = (showToast = false) => {
         setUser(null);
-    }
+        localStorage.removeItem('currentUser');
+        if (showToast) {
+            // Use onToast to transfer into ferom App Component
+            onToast("Phiên làm việc của bạn đã hết hạn. Vui lòng đăng nhập lại!", 'error');
+        }
+    };
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            if (user && user.expires_at && isSessionExpired(user.expires_at)) {
+                logout(true);
+            }
+        }, 60000);
+        return () => clearInterval(intervalId);
+    }, [user, onToast]);
 
     return (
         <AuthContext.Provider value={{ user, login, logout }}>

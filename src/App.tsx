@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import LoginScreen from './screens/Auth/LoginScreen';
 import HomeScreen from './screens/Main/HomeScreen';
 import ScanMenu from './screens/Scan/ScanMenu';
@@ -8,41 +8,65 @@ import InstallationFormContainer from './screens/Scan/InstallationForm/Installat
 import '../src/App.css';
 import NotFoundScreen from './screens/NotFound/NotFoundScreen';
 import { ScreenType, ToastType, User } from './types/common';
+import { ToastMessage } from './components/ToastMessage';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 interface ToastState {
   message: string;
   type: '' | ToastType;
 }
+// Defind key to save screen status in local storage
+const LAST_SCREEN_KEY = 'lastScreen';
 
-function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('LOGIN');
-  const [toast, setToast] = useState<ToastState>({ message: '', type: '' });
-  
-  const handleToast = useCallback((message: string, type: ToastType) => {
-    setToast({ message, type });
-  }, []);
+const AppContent = ({ onToast }: { onToast: (message: string, type: ToastType) => void }) => {
+  // Use: Get user information, login and logout function from Context
+  const { user, logout, login } = useAuth();
+  // Define screen status based on user from local storage/context
+  // const initialScreen: ScreenType = user ? 'HOME' : 'LOGIN';
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => {
+    const storedScreen = localStorage.getItem(LAST_SCREEN_KEY);
+    if (user && storedScreen && storedScreen !== 'LOGIN') {
+      return storedScreen as ScreenType;
+    }
+    return user ? 'HOME' : 'LOGIN'
+  });
+  useEffect(() => {
+    if (currentScreen !== 'LOGIN' && user) {
+      localStorage.setItem(LAST_SCREEN_KEY, currentScreen);
+    } else if (user) {
+      localStorage.removeItem(LAST_SCREEN_KEY);
+    }
+  }, [currentScreen, user]);
+  // Solve logic move screen when change user (by refresh or expire token)
+  useEffect(() => {
+    if (user && currentScreen === 'LOGIN') {
+      setCurrentScreen('HOME');
+    } else if (!user && currentScreen !== 'LOGIN') {
+      setCurrentScreen('LOGIN');
+    }
+  }, [user, currentScreen]);
 
-  const handleLogin = (userInfo: User) => {
-    setUser(userInfo);
-    setCurrentScreen('HOME');
-  };
-
+  // Funciont logout: call logout function from Context 
   const handleLogout = () => {
-    setUser(null);
+    logout(false);
     setCurrentScreen('LOGIN');
-    handleToast("Đã đăng xuất.", 'success');
+    onToast("Đã đăng xuất.", 'success');
   };
 
   const handleNavigate = useCallback((screen: ScreenType) => {
     setCurrentScreen(screen);
   }, []);
 
+  const loginWrapper = (userInfo: User) => {
+    login(userInfo);
+    setCurrentScreen('HOME');
+    onToast("Đăng nhập thành công!", 'success');
+  };
+
   const renderScreen = () => {
-    if (currentScreen === 'LOGIN') {
-      return <LoginScreen onLogin={handleLogin} onToast={handleToast} />;
+    if (!user) {
+      return <LoginScreen onLogin={loginWrapper} onToast={onToast} />;
     }
-    if (!user) return <LoginScreen onLogin={handleLogin} onToast={handleToast} />;
 
     switch (currentScreen) {
       case 'HOME':
@@ -50,9 +74,9 @@ function App() {
       case 'SCAN_MENU':
         return <ScanMenu onNavigate={handleNavigate} />;
       case 'INVENTORY_FORM':
-        return <InventoryFormContainer user={user} onToast={handleToast} onBack={() => handleNavigate('SCAN_MENU')} onNavigate={handleNavigate} />;
+        return <InventoryFormContainer user={user} onToast={onToast} onBack={() => handleNavigate('SCAN_MENU')} onNavigate={handleNavigate} />;
       case 'INSTALLATION_FORM':
-        return <InstallationFormContainer user={user} onToast={handleToast} onBack={() => handleNavigate('SCAN_MENU')} onNavigate={handleNavigate} />;
+        return <InstallationFormContainer user={user} onToast={onToast} onBack={() => handleNavigate('SCAN_MENU')} onNavigate={handleNavigate} />;
       case 'SETTINGS':
         return <NotFoundScreen />;
       case 'INFORMATION':
@@ -67,15 +91,29 @@ function App() {
         return <HomeScreen user={user} onLogout={handleLogout} onNavigate={handleNavigate} />
     }
   };
+  return renderScreen();
+};
+
+function App() {
+  const [toast, setToast] = useState<ToastState>({ message: '', type: '' });
+  const handleToast = useCallback((message: string, type: ToastType) => {
+    setToast({ message, type });
+  }, []);
+
+  const closeToast = useCallback(() => {
+    setToast({ message: '', type: '' });
+  }, []);
 
   return (
     <div className='app-wrapper'>
-      {/* <ToastMessage 
+      <ToastMessage 
         message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ message: '', type: '' })}
-      /> */}
-      {renderScreen()}
+        type={toast.type as ToastType}
+        onClose={closeToast}
+      />
+      <AuthProvider onToast={handleToast}>
+        <AppContent onToast={handleToast} />
+      </AuthProvider>
     </div>
   )
 };

@@ -5,6 +5,7 @@
     justify-content: center; /* Căn giữa 2 nút */
     align-items: center;
     margin-bottom: 15px;
+    gap: 10px;
 }
 
 .toggle-btn {
@@ -34,14 +35,14 @@
 .toggle-btn.left {
     border-top-left-radius: 15px; /* Bo tròn kiểu viên thuốc */
     border-bottom-left-radius: 15px;
-    border-right: none; /* Xóa viền phải để nối liền với nút kia */
+    border-radius: 6px;
 }
 
 /* Nút bên phải (PART NUMBER...) */
 .toggle-btn.right {
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    border-left: none;
+    border-radius: 6px;
 }
 
 /* Trạng thái được chọn (Active) */

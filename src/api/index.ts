@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { LoginPayload, User, SubmitPayload, SubmitFormType, LoginResponse } from "../types/common";
+import { LoginPayload, User, SubmitPayload, SubmitFormType, LoginResponse, AUTH_FAILURE_MESSAGE } from "../types/common";
 
 const API_BASE: string = (import.meta as any).env.VITE_EVS_API_BASE;
 const FORM_1_API: string = `${API_BASE}/WS/WarehouseImport/Scan/Form1`;
@@ -26,9 +26,11 @@ export const loginUser = async ({ username, password }: LoginPayload): Promise<U
                 expires_at: response.data.expires_at,
             } as User;
         } else if (response.data.authentication === 'failed') {
-            throw new Error(response.data.message || "Tên đăng nhập hoặc mật khẩu không chính xác");
+            const authError = new Error(`${AUTH_FAILURE_MESSAGE}`);
+            return Promise.reject(authError);
         }
-        throw new Error(response.data.message || "Đăng nhập thất bại!");
+        const unexpectedMessage = response.data.message || "Đăng nhập thất bại do phản hồi không mong muốn!";
+        return Promise.reject(new Error(unexpectedMessage));
     } catch (error) {
         let errorMessage: string = "Lỗi kết nối mạng hoặc máy chủ không phản hồi.";
         const axiosError = error as AxiosError;
