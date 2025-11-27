@@ -74,12 +74,24 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, 
                 form: formPayload
             };
             // Call API
-            await submitFormData({ data: submitData, formType: formType as SubmitFormType });
+            const response = await submitFormData({ data: submitData, formType: formType as SubmitFormType });
             // Resolve success
-            setStatus('success');
-            const successMessage = 'Gửi dữ liệu thành công';
-            setMessage(successMessage);
-            onToast(successMessage, 'success');
+            if (response.status === 'success') {
+                setStatus('success');
+                const successMessage = response.message || 'Gửi dữ liệu thành công';
+                setMessage(successMessage);
+                onToast(successMessage, 'success');
+            } else if (response.status === 'error') {
+                setStatus('error');
+                const errorMessage = response.message || 'Gửi dữ liệu thất bại';
+                setMessage(errorMessage);
+                onToast(errorMessage, 'error');
+            } else {
+                setStatus('error');
+                const unknownMessage = response.message || 'Phản hồi không rõ ràng từ máy chủ';
+                setMessage(unknownMessage);
+                onToast(unknownMessage, 'error');
+            }
         } catch (error) {
             console.log(error);
             setStatus('error');
