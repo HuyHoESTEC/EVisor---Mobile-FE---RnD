@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react";
 import { SubmitPayload, InstallationForm, BaseProps  } from "../../../types/common";
 import { submitFormData } from "../../../api";
+import { readQRCodeFromFile } from "../../../utils/qrDecoder";
+import '../../../style/Step2Input.css';
+import ScanDeviceIco from '../../../assets/icon/qr.png';
 
 interface Step2InputInstallationProps extends BaseProps {
     projectCode: string;
@@ -16,6 +19,7 @@ const Step2Input: React.FC<Step2InputInstallationProps> = ({ projectCode, onBack
     // Status
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState<string>('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
     // Resolve scan for Code field
     const handleScanComplete = (e: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
         if ((e as React.KeyboardEvent).key === 'Enter' || e.type === 'blur') {
@@ -25,6 +29,34 @@ const Step2Input: React.FC<Step2InputInstallationProps> = ({ projectCode, onBack
                 setCode(scannedValue);
             }
             if ((e as React.KeyboardEvent).key === 'Enter') e.preventDefault();
+        }
+    };
+
+    const handleScanButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    // Functon solve after user take a photo/choose file
+    const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        onToast("Đang xử lý hình ảnh...", 'info');
+        try {
+            const scannedValue = await readQRCodeFromFile(file);
+            // Check result and update state
+            if (scannedValue && scannedValue.length > 5) {
+                setCode(scannedValue);
+                onToast(`Quét mã code thành công: ${scannedValue}`, 'success');
+            } else {
+                onToast("Giá trị quét không hợp lệ hoặc quá ngắn", 'error');
+            }
+        } catch (error) {
+            console.error("Lỗi giải mã QR:", error);
+            const errorMessage = (error as Error).message || "Lỗi giải mã QR/Barcode không xác định.";
+            onToast(errorMessage, 'error');
+        } finally {
+            e.target.value = '';
         }
     };
 
@@ -78,6 +110,14 @@ const Step2Input: React.FC<Step2InputInstallationProps> = ({ projectCode, onBack
 
     return (
         <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+             <input 
+                type="file"
+                accept="image/*"
+                capture="environment"
+                ref={fileInputRef}
+                onChange={handleImageCapture}
+                style={{ display: 'none' }}
+            />
             <div style={{ marginBottom: '15px' }}>
                 <label className="ist-label">Mã dự án:</label>
                 <input className="ist-input-box" value={projectCode} readOnly />
@@ -98,43 +138,35 @@ const Step2Input: React.FC<Step2InputInstallationProps> = ({ projectCode, onBack
                     placeholder="Nhập mã tủ..."
                 />
                 <label className="ist-label">Mã Code:</label>
-                <input 
-                    ref={codeInputRef}
-                    className="ist-input-box"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    onKeyDown={handleScanComplete}
-                    onBlur={handleScanComplete}
-                    placeholder="Quét hoặc nhập Code thiết bị..."
-                    style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
-                />
+                <div className="input-group-with-button">
+                    <input 
+                        ref={codeInputRef}
+                        className="ist-input-box"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        onKeyDown={handleScanComplete}
+                        onBlur={handleScanComplete}
+                        placeholder="Quét hoặc nhập Code thiết bị..."
+                        style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
+                    />
+                    <button
+                        className="btn-scan-qr"
+                        onClick={handleScanButtonClick}
+                        type="button"
+                        disabled={status === 'loading'}
+                    >
+                        <img className="scan-icon" src={ScanDeviceIco} />
+                    </button>
+                </div>
             </div>
             <div className="footer-actions">
                 <button className="btn-back-yellow" onClick={onBack}>
                     &larr; Quay lại
                 </button>
                 <button className="btn-submit-blue" onClick={handleSubmit} disabled={status === 'loading'}>
-                    {status === 'loading' ? 'Đang lưu...' : 'Lưu dữ liệu'}
+                    {status === 'loading' ? 'Đang lưu...' : 'Gửi'} &#10146;
                 </button>
             </div>
-            {status === 'success' && (
-                <div className="result-overlay">
-                    <div className="result-box">
-                        <span className="result-icon" style={{ color: '#28a745' }}>✔</span>
-                        <p className="result-text">{message}</p>
-                    </div>
-                    <button className="btn-back-yellow" onClick={resetForm}>Tiếp tục lắp đặt</button>
-                </div>
-            )}
-            {status === 'error' && (
-                <div className="result-overlay">
-                    <div className="result-box">
-                        <span className="result-icon" style={{ color: '#dc3545' }}>✖</span>
-                        <p className="result-text">{message}</p>
-                    </div>
-                    <button className="btn-back-yellow" onClick={() => setStatus('idle')}>Thử lại &#8635;</button>
-                </div>
-            )}
         </div>
     );
 };
