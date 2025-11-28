@@ -34,14 +34,12 @@
 .toggle-btn.left {
     border-top-left-radius: 15px; /* Bo tròn kiểu viên thuốc */
     border-bottom-left-radius: 15px;
-    border-right: none; /* Xóa viền phải để nối liền với nút kia */
 }
 
 /* Nút bên phải (PART NUMBER...) */
 .toggle-btn.right {
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    border-left: none;
 }
 
 /* Trạng thái được chọn (Active) */

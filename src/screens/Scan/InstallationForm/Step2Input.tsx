@@ -83,12 +83,23 @@ const Step2Input: React.FC<Step2InputInstallationProps> = ({ projectCode, onBack
                 form: formPayload
             };
 
-            await submitFormData({ data: submitData, formType: 'INSTALLATION' });
-
-            setStatus('success');
-            const successMessage = 'Lưu dữ liệu lắp đặt thành công';
-            setMessage(successMessage);
-            onToast(successMessage, 'success');
+            const res = await submitFormData({ data: submitData, formType: 'INSTALLATION' });
+            if (res.status === 'success') {
+                setStatus('success');
+                const successMessage = 'Lưu dữ liệu lắp đặt thành công';
+                setMessage(successMessage);
+                onToast(successMessage, 'success');
+            } else if (res.status === 'error') {
+                setStatus('error');
+                const errorMessage = res.message || 'Gửi dữ liệu lắp đặt thiết bị thất bại';
+                setMessage(errorMessage);
+                onToast(errorMessage, 'error');
+            } else {
+                setStatus('error');
+                const unknownMessage = res.message || 'Phản hồi không rõ ràng từ máy chủ';
+                setMessage(unknownMessage);
+                onToast(unknownMessage, 'error');
+            }
         } catch (error) {
             console.log(error);
             setStatus('error');

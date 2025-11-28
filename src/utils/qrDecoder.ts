@@ -8,6 +8,11 @@ import jsQR from 'jsqr';
 
 export const readQRCodeFromFile = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
+        // Check if lost connect internet
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            return reject(new Error("Mất kết nối Internet!"));
+        }
+
         const reader = new FileReader();
 
         reader.onload = (e) => {
