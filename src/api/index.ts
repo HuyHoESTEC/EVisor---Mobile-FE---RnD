@@ -58,7 +58,6 @@ export const submitFormData = async ({ data, formType }: { data: SubmitPayload, 
     } else {
         throw new Error("Loại Form không hợp lệ.");
     }
-    console.log(`---Gửi dữ liệu Form ${formType} đến Endpoint: ${endpoint}---`, data);
     try {
         const response = await axios.post(endpoint, data, {
             headers: {
