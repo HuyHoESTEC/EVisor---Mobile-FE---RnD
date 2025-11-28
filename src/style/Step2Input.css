@@ -56,3 +56,49 @@
 .toggle-btn:hover:not(.active) {
     background-color: #f0f0f0;
 }
+
+.input-group-with-button {
+    display: flex;
+    gap: 8px; /* Tăng khoảng cách giữa input và button một chút */
+    align-items: center; 
+}
+
+/* Đảm bảo input chiếm hết không gian còn lại */
+.input-group-with-button .ist-input-box {
+    flex-grow: 1;
+    margin-bottom: 0 !important;
+}
+
+.btn-scan-qr {
+    /* Điều chỉnh để chứa icon và chữ */
+    display: flex; 
+    align-items: center; /* Căn dọc icon và chữ */
+    justify-content: center;
+    gap: 4px; /* Khoảng cách giữa icon và chữ */
+
+    /* Style cơ bản */
+    padding: 10px 12px; 
+    background-color: #ffffff; /* Màu xanh dương chủ đạo */
+    color: white;
+    border: 1px solid lightgray;
+    border-radius: 6px; 
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0; /* Ngăn nút bị co lại */
+}
+
+/* Trạng thái bị vô hiệu hóa */
+.btn-scan-qr:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* Style cho Icon bên trong nút Quét */
+.btn-scan-qr .scan-icon {
+    width: 18px; /* Kích thước icon */
+    height: 18px;
+    fill: currentColor; /* Lấy màu từ text của nút (màu trắng) */
+}

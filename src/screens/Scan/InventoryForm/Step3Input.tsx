@@ -2,13 +2,15 @@ import React, { useRef, useState } from "react";
 import '../../../style/Step3Input.css';
 import { BaseProps, InventoryCodeForm, InventoryPartNoForm, SubmitPayload, SubmitFormType } from "../../../types/common";
 import { submitFormData } from "../../../api";
+import { readQRCodeFromFile } from "../../../utils/qrDecoder";
+import ScanDeviceIco from '../../../assets/icon/qr.png';
 
 interface Step3InputProps extends BaseProps {
     projectCode: string;
     po: string;
 }
 
-const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, onToast }) => {
+const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, onToast }) => {
     // 1. Form Code, 2. Form Part/Seri
     const [formType, setFormType] = useState<number>(1);
     // Form Data
@@ -19,17 +21,52 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, 
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState<string>('');
     const seriInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleScanComplete = (e: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) => {
         if ((e as React.KeyboardEvent).key === 'Enter' || e.type === 'blur') {
             const target = e.target as HTMLInputElement;
             const scannedValue = target.value.trim();
             if (scannedValue && scannedValue.length > 5) {
-                setSeriNumber(scannedValue);
+                if (formType === 1) setCode(scannedValue);
+                else setSeriNumber(scannedValue);
             }
             if ((e as React.KeyboardEvent).key === 'Enter') {
                 e.preventDefault();
             }
+        }
+    };
+
+    const handleScanButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    // Functon solve after user take a photo/choose file
+    const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        onToast("Đang xử lý hình ảnh...", 'info');
+        try {
+            const scannedValue = await readQRCodeFromFile(file);
+            // Check result and update state
+            if (scannedValue && scannedValue.length > 5) {
+                if (formType === 1) {
+                    setCode(scannedValue);
+                    onToast(`Quét mã code thành công: ${scannedValue}`, 'success');
+                } else if (formType === 2) {
+                    setSeriNumber(scannedValue);
+                    onToast(`Quét Seri Number thành công: ${scannedValue}`, 'success');
+                }
+            } else {
+                onToast("Giá trị quét không hợp lệ hoặc quá ngắn", 'error');
+            }
+        } catch (error) {
+            console.error("Lỗi giải mã QR:", error);
+            const errorMessage = (error as Error).message || "Lỗi giải mã QR/Barcode không xác định.";
+            onToast(errorMessage, 'error');
+        } finally {
+            e.target.value = '';
         }
     }
 
@@ -112,6 +149,14 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, 
 
     return (
         <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <input 
+                type="file"
+                accept="image/*"
+                capture="environment"
+                ref={fileInputRef}
+                onChange={handleImageCapture}
+                style={{ display: 'none' }}
+            />
             <div style={{ marginBottom: '15px' }}>
                 <label className="inv-label">Mã dự án:</label>
                 <input className="inv-input-box" value={projectCode} readOnly />
@@ -136,33 +181,56 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, user, 
                 {formType === 1 ? (
                     <div>
                         <label className="inv-label">Mã Code:</label>
-                        <input 
-                            className="inv-input-box"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            placeholder="Nhập mã Code hàng hóa..."
-                        />
+                        <div className="input-group-with-button">
+                            <input
+                                id="code_input"
+                                className="inv-input-box"
+                                value={code}
+                                onChange={(e) => setCode(e.target.value)}
+                                placeholder="Nhập mã Code hàng hóa..."
+                                style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
+                            />
+                            <button
+                                className="btn-scan-qr"
+                                onClick={handleScanButtonClick}
+                                type="button"
+                                disabled={status === 'loading'}
+                            >
+                                <img className="scan-icon" src={ScanDeviceIco} />
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div>
                         <label className="inv-label">Part Number:</label>
                         <input 
+                            id="part_num_input"
                             className="inv-input-box"
                             value={partNumber}
                             onChange={(e) => setPartNumber(e.target.value)}
                             placeholder="Nhập Part Number..."
                         />
                         <label className="inv-label">Seri Number:</label>
-                        <input 
-                            ref={seriInputRef}
-                            className="inv-input-box"
-                            value={seriNumber}
-                            onChange={(e) => setSeriNumber(e.target.value)}
-                            onKeyDown={handleScanComplete}
-                            onBlur={handleScanComplete}
-                            placeholder="Quét hoặc nhập Seri Number..."
-                            style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
-                        />
+                        <div className="input-group-with-button">
+                            <input 
+                                ref={seriInputRef}
+                                className="inv-input-box"
+                                value={seriNumber}
+                                onChange={(e) => setSeriNumber(e.target.value)}
+                                onKeyDown={handleScanComplete}
+                                onBlur={handleScanComplete}
+                                placeholder="Quét hoặc nhập Seri Number..."
+                                style={{ backgroundColor: '#fff9c4', borderColor: '#fbc02d' }}
+                            />
+                            <button
+                                className="btn-scan-qr"
+                                onClick={handleScanButtonClick}
+                                type="button"
+                                disabled={status === 'loading'}
+                            >
+                                <img className="scan-icon" src={ScanDeviceIco} />
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
