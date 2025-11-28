@@ -168,7 +168,7 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, onToas
                     className={`toggle-btn left ${formType === 1 ? 'active' : ''}`}
                     onClick={() => setFormType(1)}
                 >
-                    CODE
+                    QR CODE
                 </button>
                 <button
                     className={`toggle-btn right ${formType === 2 ? 'active' : ''}`}
@@ -180,7 +180,7 @@ const Step3Input: React.FC<Step3InputProps> = ({ projectCode, po, onBack, onToas
             <div style={{ flex: 1 }}>
                 {formType === 1 ? (
                     <div>
-                        <label className="inv-label">Mã Code:</label>
+                        <label className="inv-label">QR Code:</label>
                         <div className="input-group-with-button">
                             <input
                                 id="code_input"
